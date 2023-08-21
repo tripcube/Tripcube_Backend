@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import uos.ac.kr.domains.Todo;
 import uos.ac.kr.enums.TodoSortKey;
 import static uos.ac.kr.domains.QTodo.todo;
+import static uos.ac.kr.domains.QUser.user;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class TodoRepositoryCustomImpl implements TodoRepositoryCustom{
     @Override
     public List<Todo> getTodos(int userId, TodoSortKey sortKey, int pages) {
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(todo.user.userId.eq(userId));
+        builder.and(user.userId.eq(userId));
 
         OrderSpecifier<?>[] sortOrder = new OrderSpecifier[] {};
 
@@ -47,7 +48,7 @@ public class TodoRepositoryCustomImpl implements TodoRepositoryCustom{
                 break;
         }
 
-        return queryFactory.selectFrom(todo).where(builder).offset(10L *pages).limit(10).orderBy(sortOrder).fetch();
+        return queryFactory.selectFrom(todo).join(todo.user, user).where(builder).offset(10L *pages).limit(10).orderBy(sortOrder).fetch();
 
     }
 }

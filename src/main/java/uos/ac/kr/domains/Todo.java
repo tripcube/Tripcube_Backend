@@ -20,7 +20,7 @@ public class Todo implements Serializable {
     @Column(name = "todoId")
     private int todoId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (nullable = false, name = "userId")
     private User user;
 

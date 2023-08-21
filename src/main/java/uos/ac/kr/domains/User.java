@@ -39,7 +39,7 @@ public class User implements Serializable {
     private Date createdAt;
 
     // 연관관계
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Todo> todos = new ArrayList<Todo>();
 
 }
