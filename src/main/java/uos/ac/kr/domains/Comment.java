@@ -1,0 +1,42 @@
+package uos.ac.kr.domains;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
+
+@Entity(name="Comment")
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+public class Comment implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "commentId")
+    private int commentId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "todoId")
+    private Todo todo;
+
+    @Column(nullable = false, length = 1000)
+    private String content;
+
+    @Column
+    private int likes;
+
+    @Column
+    private Date createdAt;
+
+    @Column
+    private Date updatedAt;
+}
