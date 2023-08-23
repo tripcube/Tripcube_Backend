@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController()
-@RequestMapping("/todo")
+@RequestMapping("/todos")
 @CrossOrigin(origins = "*")
 
 public class TodoController {
@@ -42,7 +42,7 @@ public class TodoController {
     private final LikeTodoRepository likeTodoRepo;
     private final UserRepository userRepo;
 
-    @PostMapping("/new")
+    @PostMapping()
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "Todo 등록", protocols = "http")
     public ResponseEntity<BasicResponse<Null>> insert(@RequestBody @Valid NewTodoDTO newTodoDTO) {
@@ -57,6 +57,7 @@ public class TodoController {
         newTodo.setCreatedAt(new Date());
         newTodo.setUser(user);
         newTodo.setLikes(0);
+        newTodo.setPlaceName(PlaceRepository.getPlaceName(newTodo.getPlaceId()));
 
         todoRepo.save(newTodo);
 
@@ -74,7 +75,7 @@ public class TodoController {
         int MyuserId = customUserDetails.getUserId();
 
         TodoSortKey todoSortKey = TodoSortKey.valueOf(sortkey);
-        List<Todo> todos = todoRepo.getTodos(userId, todoSortKey, pages);
+        List<Todo> todos = todoRepo.getTodosForUserId(userId, todoSortKey, pages, 10);
         List<GetTodoDTO> getTodoDTOs = todos.stream().map(TodoMapper.INSTANCE::toDTO).collect(Collectors.toList());
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy년 MM월 dd일 등록");
@@ -86,7 +87,6 @@ public class TodoController {
            }
            dto.setUserId(userId);
            dto.setDate(format.format(dto.getCreatedAt()));
-           dto.setPlaceName(PlaceRepository.getPlaceName(dto.getPlaceId()));
         }
 
         BasicResponse<List<GetTodoDTO>> response = BasicResponse.<List<GetTodoDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(getTodoDTOs).build();
@@ -94,14 +94,38 @@ public class TodoController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/like")
+    @GetMapping("/place")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "장소 ID로 TODO 조회", protocols = "http")
+    public ResponseEntity<BasicResponse<List<GetTodoDTO>>> getTodosForPlaceId(@RequestParam("placeId") int placeId, @RequestParam("sort") String sortkey, @RequestParam("page") int pages, @RequestParam("limit") int limit) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyuserId = customUserDetails.getUserId();
+
+        TodoSortKey todoSortKey = TodoSortKey.valueOf(sortkey);
+        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, todoSortKey, pages, limit);
+        List<GetTodoDTO> getTodoDTOs = todos.stream().map(TodoMapper.INSTANCE::toDTO).collect(Collectors.toList());
+
+        for(GetTodoDTO dto : getTodoDTOs) {
+            LikeTodoId likeTodoId = new LikeTodoId(MyuserId, dto.getTodoId());
+            Optional<Like_Todo> likeTodo= likeTodoRepo.findById(likeTodoId);
+            if (!likeTodo.isEmpty()) {
+                dto.setLike(true);
+            }
+        }
+
+        BasicResponse<List<GetTodoDTO>> response = BasicResponse.<List<GetTodoDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(getTodoDTOs).build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{todoId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "TODO 좋아요 하기", protocols = "http")
-    public ResponseEntity<BasicResponse<Null>> likeTodo(@RequestBody HashMap<String, Integer> map) {
+    public ResponseEntity<BasicResponse<Null>> likeTodo(@PathVariable("todoId") int todoId) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int userId = customUserDetails.getUserId();
-        int todoId = map.get("todoId");
 
         Like_Todo likeTodo = new Like_Todo();
         LikeTodoId likeTodoId = new LikeTodoId();
@@ -133,14 +157,13 @@ public class TodoController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/unlike")
+    @PostMapping("/{todoId}/unlike")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "TODO 좋아요 취소", protocols = "http")
-    public ResponseEntity<BasicResponse<Null>> unlikeTodo(@RequestBody HashMap<String, Integer> map) {
+    public ResponseEntity<BasicResponse<Null>> unlikeTodo(@PathVariable("todoId") int todoId) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int userId = customUserDetails.getUserId();
-        int todoId = map.get("todoId");
 
         LikeTodoId likeTodoId = new LikeTodoId();
         likeTodoId.setTodoId(todoId);

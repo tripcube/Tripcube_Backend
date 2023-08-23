@@ -6,5 +6,7 @@ import uos.ac.kr.enums.TodoSortKey;
 import java.util.List;
 
 public interface TodoRepositoryCustom {
-    List<Todo> getTodos(int userId, TodoSortKey sortKey, int pages);
+    List<Todo> getTodosForUserId(int userId, TodoSortKey sortKey, int pages, int limit);
+
+    List<Todo> getTodosForPlaceId(int placeId, TodoSortKey sortKey, int pages, int limit);
 }

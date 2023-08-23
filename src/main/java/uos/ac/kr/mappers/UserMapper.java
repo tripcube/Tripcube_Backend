@@ -6,6 +6,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import uos.ac.kr.domains.User;
+import uos.ac.kr.dtos.GetUserDTO;
 import uos.ac.kr.dtos.InsertUserDTO;
 import uos.ac.kr.dtos.UpdateUserDTO;
 
@@ -17,6 +18,8 @@ public interface UserMapper {
     User toEntity(InsertUserDTO userDTO);
 
     InsertUserDTO toDTO(User user);
+
+    GetUserDTO toGetDTO(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateFromDto(UpdateUserDTO memberDTO, @MappingTarget User entity);

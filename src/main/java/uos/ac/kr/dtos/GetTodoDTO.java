@@ -1,5 +1,6 @@
 package uos.ac.kr.dtos;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import uos.ac.kr.domains.Todo;
 
@@ -17,9 +18,14 @@ public class GetTodoDTO {
     private String content;
     private int likes;
     private Date createdAt;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private String date;
+
     private String tag;
     private boolean isLike;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int userId;
 
 }

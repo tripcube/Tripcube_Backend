@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController()
-@RequestMapping("/comment")
+@RequestMapping("/comments")
 @CrossOrigin(origins = "*")
 public class CommentController {
 
@@ -34,7 +34,7 @@ public class CommentController {
     private final LikeCommentRepository likeCommentRepo;
     private final UserRepository userRepo;
 
-    @PostMapping("/new")
+    @PostMapping()
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "댓글 등록", protocols = "http")
     public ResponseEntity<BasicResponse<Null>> insert(@RequestBody NewCommentDTO commentDTO) {
@@ -80,7 +80,7 @@ public class CommentController {
             getCommentDTOs.get(i).setTodo_content(comments.get(i).getTodo().getContent());
             getCommentDTOs.get(i).setComment_content(comments.get(i).getContent());
             getCommentDTOs.get(i).setPlaceId(comments.get(i).getTodo().getPlaceId());
-            getCommentDTOs.get(i).setPlaceName(PlaceRepository.getPlaceName(comments.get(i).getTodo().getPlaceId()));
+            getCommentDTOs.get(i).setPlaceName(comments.get(i).getTodo().getPlaceName());
             getCommentDTOs.get(i).setTag(comments.get(i).getTodo().getTag());
             getCommentDTOs.get(i).setTodo_likes(comments.get(i).getTodo().getLikes());
             getCommentDTOs.get(i).setComment_likes(comments.get(i).getLikes());
@@ -102,14 +102,13 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/like")
+    @PostMapping("/{commentId}/like}")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "댓글 좋아요 하기", protocols = "http")
-    public ResponseEntity<BasicResponse<Null>> like(@RequestBody HashMap<String, Integer> map) {
+    public ResponseEntity<BasicResponse<Null>> like(@PathVariable("commentId") int commentId) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int userId = customUserDetails.getUserId();
-        int commentId = map.get("commentId");
 
         Like_Comment likeComment = new Like_Comment();
         LikeCommentId likeCommentId = new LikeCommentId(userId, commentId);
@@ -141,14 +140,13 @@ public class CommentController {
 
     }
 
-    @PostMapping("/unlike")
+    @PostMapping("/{commentId}/unlike")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "댓글 좋아요 취소", protocols = "http")
-    public ResponseEntity<BasicResponse<Null>> unlike(@RequestBody HashMap<String, Integer> map) {
+    public ResponseEntity<BasicResponse<Null>> unlike(@PathVariable("commentId") int commentId) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int userId = customUserDetails.getUserId();
-        int commentId = map.get("commentId");
 
         LikeCommentId likeCommentId = new LikeCommentId(userId, commentId);
 

@@ -27,6 +27,9 @@ public class Todo implements Serializable {
     @Column(nullable = false)
     private int placeId;
 
+    @Column(nullable = false)
+    private String placeName;
+
     @Column(nullable = false, length = 1000)
     private String content;
 

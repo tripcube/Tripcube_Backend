@@ -82,6 +82,9 @@ dependencies {
 	// JWT Web Token
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 
+	//XML to JSON
+	implementation 'org.json:json:20200518'
+
 }
 
 tasks.named('test') {
