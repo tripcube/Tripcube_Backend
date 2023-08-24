@@ -17,4 +17,5 @@ public class GetPlaceDTO {
     private double mapX;
     private double mapY;
     private int contenttype;
+    private boolean scrap;
 }

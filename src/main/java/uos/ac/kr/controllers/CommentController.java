@@ -140,7 +140,7 @@ public class CommentController {
 
     }
 
-    @PostMapping("/{commentId}/unlike")
+    @DeleteMapping("/{commentId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "댓글 좋아요 취소", protocols = "http")
     public ResponseEntity<BasicResponse<Null>> unlike(@PathVariable("commentId") int commentId) {

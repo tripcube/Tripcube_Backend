@@ -157,7 +157,7 @@ public class TodoController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/{todoId}/unlike")
+    @DeleteMapping ("/{todoId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "TODO 좋아요 취소", protocols = "http")
     public ResponseEntity<BasicResponse<Null>> unlikeTodo(@PathVariable("todoId") int todoId) {
