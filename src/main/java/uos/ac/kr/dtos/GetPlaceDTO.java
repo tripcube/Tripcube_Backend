@@ -18,12 +18,17 @@ public class GetPlaceDTO {
     private String placeName;
     private int placeId;
     private String image;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private double mapX;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private double mapY;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int contenttype;
     private boolean scrap;
 
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private ArrayList<String> tags;
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)

@@ -166,10 +166,20 @@ public class PlaceController {
 
         User user = new User();
         user.setUserId(MyuserId);
+        String XML_STRING = PlaceRepository.getPlaceDetail(placeId);
+        JSONObject jsonObject = XML.toJSONObject(XML_STRING);
+        JSONObject responseJson = (JSONObject) jsonObject.get("response");
+        JSONObject body = (JSONObject) responseJson.get("body");
+        JSONObject items = (JSONObject) body.get("items");
+        JSONObject item = (JSONObject) items.get("item");
+
         Scrap_Place scrapPlace = new Scrap_Place();
         scrapPlace.setUser(user);
         scrapPlace.setPlaceId(placeId);
         scrapPlace.setCreatedAt(new Date());
+        scrapPlace.setPlaceName(item.get("title").toString());
+        scrapPlace.setPlaceAddress(item.get("addr1").toString());
+        scrapPlace.setPlaceImage(item.get("firstimage").toString());
 
         scrapPlaceRepo.save(scrapPlace);
 
@@ -180,7 +190,7 @@ public class PlaceController {
 
     @DeleteMapping("/{placeId}/scrap")
     @ResponseStatus(value = HttpStatus.OK)
-    @ApiOperation(value = "장소 스크랩 하기", protocols = "http")
+    @ApiOperation(value = "장소 스크랩 삭제", protocols = "http")
     public ResponseEntity<BasicResponse<Null>> unScrap(@PathVariable("placeId") int placeId) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -277,6 +287,51 @@ public class PlaceController {
         placeDTO.setTags(tags);
 
         BasicResponse<GetPlaceDTO> response = BasicResponse.<GetPlaceDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTO).build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/scrap")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "스크랩한 장소 보기", protocols = "http")
+    public ResponseEntity<BasicResponse<List<GetPlaceDTO>>> getScrapPlace(@RequestParam("page") int pages) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyUserId = customUserDetails.getUserId();
+
+        List<GetPlaceDTO> placeDTOS = new ArrayList<>();
+
+        List<Scrap_Place> scrapPlaces = scrapPlaceRepo.getScrapPlace(MyUserId, pages);
+
+        for(int i=0; i<scrapPlaces.size(); i++) {
+            GetPlaceDTO getPlaceDTO = new GetPlaceDTO();
+            getPlaceDTO.setPlaceId(scrapPlaces.get(i).getPlaceId());
+            getPlaceDTO.setPlaceName(scrapPlaces.get(i).getPlaceName());
+            getPlaceDTO.setAddress(scrapPlaces.get(i).getPlaceAddress());
+            getPlaceDTO.setImage(scrapPlaces.get(i).getPlaceImage());
+            getPlaceDTO.setScrap(true);
+
+            //태그 불러오기
+            ArrayList<String> tags = new ArrayList<>();
+            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), TodoSortKey.LIKE_DESC, 0, 2);
+            String firstTag = "";
+
+            for (int j=0; j<todos.size(); j++) {
+                if (j == 0) {
+                    firstTag = todos.get(j).getTag();
+                    tags.add(firstTag);
+                }
+                else if (!todos.get(j).getTag().equals(firstTag)) {
+                    tags.add(todos.get(j).getTag());
+                }
+            }
+            getPlaceDTO.setTags(tags);
+
+            placeDTOS.add(getPlaceDTO);
+        }
+
+
+        BasicResponse<List<GetPlaceDTO>> response = BasicResponse.<List<GetPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTOS).build();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

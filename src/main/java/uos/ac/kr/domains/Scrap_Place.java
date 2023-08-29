@@ -27,6 +27,15 @@ public class Scrap_Place implements Serializable {
     @Column(nullable = false)
     private int placeId;
 
+    @Column(nullable = false)
+    private String placeName;
+
+    @Column(nullable = false)
+    private String placeAddress;
+
+    @Column(nullable = false)
+    private String placeImage;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="createdAt", nullable = false)
     private Date createdAt;

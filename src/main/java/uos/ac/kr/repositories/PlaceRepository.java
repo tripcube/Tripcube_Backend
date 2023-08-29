@@ -16,6 +16,8 @@ import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlaceRepository {
 
@@ -55,6 +57,7 @@ public class PlaceRepository {
 
         return returnValue;
    }
+
 
    static public String getLocationPlace(double mapX, double mapY, int page) {
         String value = "";
@@ -129,6 +132,7 @@ public class PlaceRepository {
         return value;
     }
 
+    //소개정보
     static public String getPlaceDetail2(int placeId, int contentType) {
         String value = "";
         String uri = "http://apis.data.go.kr/B551011/KorService1/detailIntro1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&MobileOS=ETC&MobileApp=AppTest";
