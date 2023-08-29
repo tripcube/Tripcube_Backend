@@ -15,6 +15,7 @@ import uos.ac.kr.mappers.CommentMapper;
 import uos.ac.kr.repositories.*;
 import uos.ac.kr.responses.BasicResponse;
 
+import javax.transaction.Transactional;
 import javax.validation.constraints.Null;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -102,7 +103,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/{commentId}/like}")
+    @PostMapping("/{commentId}/like")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "댓글 좋아요 하기", protocols = "http")
     public ResponseEntity<BasicResponse<Null>> like(@PathVariable("commentId") int commentId) {
@@ -198,5 +199,51 @@ public class CommentController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    @DeleteMapping("/{commentId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "댓글 삭제", protocols = "http")
+    @Transactional
+    public ResponseEntity<BasicResponse<Null>> delete(@PathVariable("commentId") int commentId) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyuserId = customUserDetails.getUserId();
+
+        Comment comment = commentRepo.findById(commentId).get();
+
+        if (comment.getUser().getUserId() != MyuserId) {
+            throw new AccessDeniedException("다른 사람의 댓글을 지울 수 없습니다.");
+        }
+
+        List<Like_Comment> likeComments = likeCommentRepo.getLikeCommentsFromCommentID(commentId);
+
+        for(int i=0; i<likeComments.size(); i++) {
+            likeCommentRepo.delete(likeComments.get(i));
+        }
+
+        commentRepo.delete(comment);
+
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{commentId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "댓글 수정", protocols = "http")
+    public ResponseEntity<BasicResponse<Null>> update(@PathVariable("commentId") int commentId, @RequestBody NewCommentDTO newCommentDTO) {
+
+        Comment comment = commentRepo.findById(commentId).get();
+
+        comment.setContent(newCommentDTO.getContent());
+        comment.setUpdatedAt(new Date());
+
+        commentRepo.save(comment);
+
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
 
 }
