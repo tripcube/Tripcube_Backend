@@ -28,4 +28,7 @@ public class GetTodoDTO {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int userId;
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private String userName;
+
 }

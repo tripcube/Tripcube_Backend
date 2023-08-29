@@ -186,5 +186,31 @@ public class TodoController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @GetMapping ("/{todoId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "TODO 상세 정보 조회", protocols = "http")
+    public ResponseEntity<BasicResponse<GetTodoDTO>> getTodo(@PathVariable("todoId") int todoId) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyUserId = customUserDetails.getUserId();
+
+        Todo todo = todoRepo.findById(todoId).get();
+        GetTodoDTO todoDTO = TodoMapper.INSTANCE.toDTO(todo);
+
+        LikeTodoId likeTodoId = new LikeTodoId(MyUserId, todoId);
+        Optional<Like_Todo> likeTodo = likeTodoRepo.findById(likeTodoId);
+        if (!likeTodo.isEmpty()) {
+            todoDTO.setLike(true);
+        }
+
+        User user = todo.getUser();
+        todoDTO.setUserId(user.getUserId());
+        todoDTO.setUserName(user.getName());
+
+        BasicResponse<GetTodoDTO> response = BasicResponse.<GetTodoDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(todoDTO).build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
 
 }

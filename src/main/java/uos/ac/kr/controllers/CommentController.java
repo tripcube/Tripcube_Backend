@@ -71,7 +71,7 @@ public class CommentController {
         int MyuserId = customUserDetails.getUserId();
 
         CommentSortKey commentSortKey = CommentSortKey.valueOf(sortkey);
-        List<Comment> comments = commentRepo.getComments(userId, commentSortKey, pages);
+        List<Comment> comments = commentRepo.getCommentsFromUserId(userId, commentSortKey, pages);
         List<GetCommentDTO> getCommentDTOs = comments.stream().map(CommentMapper.INSTANCE::toDTO).collect(Collectors.toList());
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy년 MM월 dd일 등록");
@@ -163,6 +163,38 @@ public class CommentController {
         commentRepo.save(comment);
 
         BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/todo")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "TODO ID로 댓글 조회", protocols = "http")
+    public ResponseEntity<BasicResponse<List<GetCommentDTO>>> getCommentsFromTodoID(@RequestParam("todoId") int todoId, @RequestParam("sort") String sortkey, @RequestParam("page") int pages) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyuserId = customUserDetails.getUserId();
+
+        CommentSortKey commentSortKey = CommentSortKey.valueOf(sortkey);
+        List<Comment> comments = commentRepo.getCommentsFromTodoID(todoId, commentSortKey, pages);
+        List<GetCommentDTO> getCommentDTOs = comments.stream().map(CommentMapper.INSTANCE::toDTO).collect(Collectors.toList());
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy년 MM월 dd일 등록");
+        for(int i=0; i<comments.size(); i++) {
+            User user = comments.get(i).getUser();
+            getCommentDTOs.get(i).setUserId(user.getUserId());
+            getCommentDTOs.get(i).setUserName(user.getName());
+            getCommentDTOs.get(i).setComment_content(comments.get(i).getContent());
+            getCommentDTOs.get(i).setComment_likes(comments.get(i).getLikes());
+            getCommentDTOs.get(i).setDate(format.format(comments.get(i).getCreatedAt()));
+            LikeCommentId likeCommentId = new LikeCommentId(MyuserId, comments.get(i).getCommentId());
+            Optional<Like_Comment> likeComment = likeCommentRepo.findById(likeCommentId);
+            if (!likeComment.isEmpty()) {
+                getCommentDTOs.get(i).setComment_islike(true);
+            }
+        }
+
+        BasicResponse<List<GetCommentDTO>> response = BasicResponse.<List<GetCommentDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(getCommentDTOs).build();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
