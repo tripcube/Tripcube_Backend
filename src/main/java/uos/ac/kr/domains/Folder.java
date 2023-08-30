@@ -7,7 +7,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity(name="Folder")
 @AllArgsConstructor
@@ -33,4 +35,8 @@ public class Folder implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="createdAt", nullable = false)
     private Date createdAt;
+
+    // 연관관계
+    @OneToMany(mappedBy = "folder", cascade = CascadeType.REMOVE)
+    private List<Scrap_Folder> scrapFolders = new ArrayList<>();
 }

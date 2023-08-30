@@ -16,6 +16,7 @@ import uos.ac.kr.repositories.ScrapFolderRepository;
 import uos.ac.kr.repositories.ScrapPlaceRepository;
 import uos.ac.kr.responses.BasicResponse;
 
+import javax.swing.plaf.PanelUI;
 import javax.transaction.Transactional;
 import javax.validation.constraints.Null;
 import java.util.Arrays;
@@ -138,4 +139,47 @@ public class FolderController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    @PutMapping("/{folderId}/name")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "폴더 이름 변경", protocols = "http")
+    public ResponseEntity<BasicResponse<Null>> updateName(@PathVariable("folderId") int folderId, @RequestBody NewFolderDTO newFolderDTO) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int userId = customUserDetails.getUserId();
+
+        Folder folder = folderRepo.findById(folderId).get();
+        if (folder.getUser().getUserId() != userId) {
+            throw new AccessDeniedException("다른 유저의 폴더에 접근할 수 없습니다.");
+        }
+
+        folder.setName(newFolderDTO.getName());
+        folderRepo.save(folder);
+
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{folderId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "폴더 삭제", protocols = "http")
+    @Transactional
+    public ResponseEntity<BasicResponse<Null>> delete(@PathVariable("folderId") int folderId) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int userId = customUserDetails.getUserId();
+
+        Folder folder = folderRepo.findById(folderId).get();
+        if (folder.getUser().getUserId() != userId) {
+            throw new AccessDeniedException("다른 유저의 폴더에 접근할 수 없습니다.");
+        }
+
+        folderRepo.delete(folder);
+
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
 }
