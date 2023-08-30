@@ -7,7 +7,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity(name="Comment")
 @AllArgsConstructor
@@ -39,4 +41,7 @@ public class Comment implements Serializable {
 
     @Column
     private Date updatedAt;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
+    private List<Like_Comment> likeComments = new ArrayList<>();
 }

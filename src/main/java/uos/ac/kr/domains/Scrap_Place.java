@@ -7,7 +7,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity(name="Scrap_Place")
 @AllArgsConstructor
@@ -39,4 +41,7 @@ public class Scrap_Place implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="createdAt", nullable = false)
     private Date createdAt;
+
+    @OneToMany(mappedBy = "scrapPlace", cascade = CascadeType.REMOVE)
+    private List<Scrap_Folder> scrapFolders = new ArrayList<>();
 }

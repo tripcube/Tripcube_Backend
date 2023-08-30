@@ -215,12 +215,6 @@ public class CommentController {
             throw new AccessDeniedException("다른 사람의 댓글을 지울 수 없습니다.");
         }
 
-        List<Like_Comment> likeComments = likeCommentRepo.getLikeCommentsFromCommentID(commentId);
-
-        for(int i=0; i<likeComments.size(); i++) {
-            likeCommentRepo.delete(likeComments.get(i));
-        }
-
         commentRepo.delete(comment);
 
         BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
