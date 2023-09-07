@@ -15,8 +15,10 @@ import uos.ac.kr.domains.Todo;
 import uos.ac.kr.domains.User;
 import uos.ac.kr.dtos.GetLocationPlaceDTO;
 import uos.ac.kr.dtos.GetPlaceDTO;
+import uos.ac.kr.dtos.GetScrapPlaceDTO;
 import uos.ac.kr.enums.TodoSortKey;
 import uos.ac.kr.exceptions.AccessDeniedException;
+import uos.ac.kr.mappers.ScrapPlaceMapper;
 import uos.ac.kr.repositories.PlaceRepository;
 import uos.ac.kr.repositories.ScrapPlaceRepository;
 import uos.ac.kr.repositories.TodoRepository;
@@ -294,23 +296,15 @@ public class PlaceController {
     @GetMapping("/scrap")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "스크랩한 장소 보기", protocols = "http")
-    public ResponseEntity<BasicResponse<List<GetPlaceDTO>>> getScrapPlace(@RequestParam("page") int pages) {
+    public ResponseEntity<BasicResponse<List<GetScrapPlaceDTO>>> getScrapPlace(@RequestParam("page") int pages) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int MyUserId = customUserDetails.getUserId();
 
-        List<GetPlaceDTO> placeDTOS = new ArrayList<>();
-
         List<Scrap_Place> scrapPlaces = scrapPlaceRepo.getScrapPlace(MyUserId, pages);
+        List<GetScrapPlaceDTO> placeDTOS = scrapPlaces.stream().map(ScrapPlaceMapper.INSTANCE::toDTO).collect(Collectors.toList());
 
-        for(int i=0; i<scrapPlaces.size(); i++) {
-            GetPlaceDTO getPlaceDTO = new GetPlaceDTO();
-            getPlaceDTO.setPlaceId(scrapPlaces.get(i).getPlaceId());
-            getPlaceDTO.setPlaceName(scrapPlaces.get(i).getPlaceName());
-            getPlaceDTO.setAddress(scrapPlaces.get(i).getPlaceAddress());
-            getPlaceDTO.setImage(scrapPlaces.get(i).getPlaceImage());
-            getPlaceDTO.setScrap(true);
-
+        for(int i=0; i<placeDTOS.size(); i++) {
             //태그 불러오기
             ArrayList<String> tags = new ArrayList<>();
             List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), TodoSortKey.LIKE_DESC, 0, 2);
@@ -325,13 +319,11 @@ public class PlaceController {
                     tags.add(todos.get(j).getTag());
                 }
             }
-            getPlaceDTO.setTags(tags);
-
-            placeDTOS.add(getPlaceDTO);
+            placeDTOS.get(i).setTags(tags);
         }
 
 
-        BasicResponse<List<GetPlaceDTO>> response = BasicResponse.<List<GetPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTOS).build();
+        BasicResponse<List<GetScrapPlaceDTO>> response = BasicResponse.<List<GetScrapPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTOS).build();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

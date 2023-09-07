@@ -1,9 +1,6 @@
 package uos.ac.kr.domains;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -16,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Setter
 @Getter
+@Builder
 public class Folder implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +29,9 @@ public class Folder implements Serializable {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private int placeCount;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="createdAt", nullable = false)
