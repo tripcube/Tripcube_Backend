@@ -3,6 +3,7 @@ package uos.ac.kr.controllers;
 import io.jsonwebtoken.Claims;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @RestController()
 @RequestMapping("/auth")
@@ -63,6 +63,10 @@ public class AuthController {
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "회원가입 시 닉네임 중복 체크", protocols = "http")
     public ResponseEntity<BasicResponse<Boolean>> checkName(@RequestBody InsertUserDTO insertUserDTO) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Allow-Origin", "http://localhost:3001"); // 요청을 허용할 origin을 여기에 지정
+
 
         if (userRepo.getUserByName(insertUserDTO.getName()).isPresent()) {
             BasicResponse<Boolean> response = BasicResponse.<Boolean>builder().code(HttpStatus.OK.value()).httpStatus(HttpStatus.OK).message("SUCCESS").data(false).build();

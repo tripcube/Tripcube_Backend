@@ -19,12 +19,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
         try {
             // 헤더에서 JWT 를 받아옵니다.
             // System.out.println("[JWTExceptionHandlerFilter] "+token.get());
             // 유효한 토큰인지 확인합니다.
             String URI = request.getRequestURI().toString();
-            if (URI.contains("/auth") || URI.contains("/swagger-")) {
+            System.out.println(URI);
+
+            if (URI.contains("auth") || URI.contains("swagger-ui")) {
                 filterChain.doFilter(request, response);
                 return;
             }

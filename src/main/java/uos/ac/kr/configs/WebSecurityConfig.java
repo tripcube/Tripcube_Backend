@@ -9,8 +9,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import uos.ac.kr.utils.JwtAuthenticationFilter;
 import uos.ac.kr.utils.JwtTokenProvider;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,7 +33,13 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.httpBasic().disable() // rest api 만을 고려하여 기본 설정은 해제하겠습니다.
-                .cors().and()
+                .cors().configurationSource(request -> {
+                    var cors = new CorsConfiguration();
+                    cors.setAllowedOrigins(List.of("http://localhost:3001"));
+                    cors.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS"));
+                    cors.setAllowedHeaders(List.of("*"));
+                    return cors;
+                }).and()
                 .csrf().disable() // csrf 보안 토큰 disable처리.
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
