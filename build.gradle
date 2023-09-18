@@ -85,6 +85,9 @@ dependencies {
 	//XML to JSON
 	implementation 'org.json:json:20200518'
 
+	//JSON simple (String to JSON)
+	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+
 }
 
 tasks.named('test') {

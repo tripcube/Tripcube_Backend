@@ -2,34 +2,31 @@ package uos.ac.kr.controllers;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import uos.ac.kr.domains.*;
+import uos.ac.kr.dtos.GetTagDTO;
 import uos.ac.kr.dtos.GetTodoDTO;
 import uos.ac.kr.dtos.NewTodoDTO;
 import uos.ac.kr.enums.TodoSortKey;
 import uos.ac.kr.exceptions.AccessDeniedException;
-import uos.ac.kr.exceptions.DataFormatException;
 import uos.ac.kr.exceptions.ResourceNotFoundException;
+import uos.ac.kr.key.ChatGPT;
 import uos.ac.kr.mappers.TodoMapper;
-import uos.ac.kr.mappers.UserMapper;
 import uos.ac.kr.repositories.*;
 import uos.ac.kr.responses.BasicResponse;
+import uos.ac.kr.utils.JsonUtil;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Null;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -209,6 +206,63 @@ public class TodoController {
 
         BasicResponse<GetTodoDTO> response = BasicResponse.<GetTodoDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(todoDTO).build();
 
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/tag")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "TODO 상세 정보 조회", protocols = "http")
+    public ResponseEntity<BasicResponse<Integer>> getTag(@RequestBody @Valid GetTagDTO tagDTO) {
+
+        //HTTP Header
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Authorization", "Bearer " + ChatGPT.API_KEY);
+
+        //HTTP Body
+        JSONObject params = new JSONObject();
+        params.put("model", ChatGPT.MODEL);
+        List<JSONObject> msg = new LinkedList<>();
+        JSONObject msg1 = new JSONObject();
+        JSONObject msg2 = new JSONObject();
+        msg1.put("role", "system");
+        msg1.put("content", ChatGPT.System_msg);
+        msg2.put("role", "user");
+        msg2.put("content", "todo: " + tagDTO.getTodo() + " \n ->");
+        msg.add(msg1);
+        msg.add(msg2);
+        params.put("messages", msg);
+
+        // 헤더와 바디 합치기
+        HttpEntity<String> entity = new HttpEntity<>(params.toString(), headers);
+
+        // POST 요청보내기
+        RestTemplate rt = new RestTemplate();
+        ResponseEntity<String> response2 = rt.exchange(
+            "https://api.openai.com/v1/chat/completions",
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        // ChatGPT API Response에서 답변 추출
+        int value;
+        try {
+            JSONParser parser = new JSONParser();
+            Object o = parser.parse(response2.getBody());
+            org.json.simple.JSONObject object = (org.json.simple.JSONObject) o;
+            org.json.simple.JSONArray data =  (org.json.simple.JSONArray) object.get("choices");
+            org.json.simple.JSONObject message = (org.json.simple.JSONObject) ((org.json.simple.JSONObject) data.get(0)).get("message");
+
+            String[] strs;
+            strs = ((String) message.get("content")).split(" ");
+            value = Integer.parseInt(strs[1]);
+        }
+        catch (Exception e) {
+            throw new ResourceNotFoundException("ChatGPT 답변을 불러오는데 실패했습니다.");
+        }
+
+        BasicResponse<Integer> response = BasicResponse.<Integer>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(value).build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
