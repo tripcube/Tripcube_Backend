@@ -7,10 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.json.simple.parser.JSONParser;
+import org.springframework.http.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import uos.ac.kr.domains.*;
 import uos.ac.kr.dtos.GetLocationPlaceDTO;
 import uos.ac.kr.dtos.GetMainPlaceDTO;
@@ -18,6 +20,8 @@ import uos.ac.kr.dtos.GetPlaceDTO;
 import uos.ac.kr.dtos.GetScrapPlaceDTO;
 import uos.ac.kr.enums.TodoSortKey;
 import uos.ac.kr.exceptions.AccessDeniedException;
+import uos.ac.kr.exceptions.ResourceNotFoundException;
+import uos.ac.kr.key.ChatGPT;
 import uos.ac.kr.mappers.ScrapPlaceMapper;
 import uos.ac.kr.repositories.ActivityRepository;
 import uos.ac.kr.repositories.PlaceRepository;
@@ -25,7 +29,6 @@ import uos.ac.kr.repositories.ScrapPlaceRepository;
 import uos.ac.kr.repositories.TodoRepository;
 import uos.ac.kr.responses.BasicResponse;
 import uos.ac.kr.utils.JsonUtil;
-import static uos.ac.kr.domains.QTodo.todo;
 
 import javax.validation.constraints.Null;
 import java.util.*;
@@ -399,6 +402,97 @@ public class PlaceController {
                     .content(todo.get(0).getContent())
                     .build();
             placeDTOS.add(dto);
+        }
+
+        BasicResponse<List<GetMainPlaceDTO>> response = BasicResponse.<List<GetMainPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTOS).build();
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/recommend/like-place")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "좋아할 장소 추천", protocols = "http")
+    public ResponseEntity<BasicResponse<List<GetMainPlaceDTO>>> getLikePlaces(@RequestParam("page") int page) {
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyUserId = customUserDetails.getUserId();
+
+        //사용자가 작성한 TODO로 Text 작성
+        List<Todo> todos = todoRepo.getTodosForUserId(MyUserId, TodoSortKey.LIKE_DESC, 0, 10);
+        String text = "";
+        for(Todo t : todos) {
+            text += t.getContent();
+            text += ", ";
+        }
+
+        //AI 서버 요청
+        //HTTP Header
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+
+        //HTTP Body
+        JSONObject params = new JSONObject();
+        params.put("text", text);
+        params.put("page", page);
+
+        // 헤더와 바디 합치기
+        HttpEntity<String> entity = new HttpEntity<>(params.toString(), headers);
+
+        // POST 요청보내기
+        RestTemplate rt = new RestTemplate();
+        ResponseEntity<String> response2 = rt.exchange(
+                "http://localhost:8000/recommand",
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        // AI API Response에서 답변 추출
+        System.out.println("hear!");
+        List<Integer> placeIds = new LinkedList<>();
+        try {
+            JSONParser parser = new JSONParser();
+            Object o = parser.parse(response2.getBody());
+            org.json.simple.JSONArray array = (org.json.simple.JSONArray) o;
+            for(Object object : array) {
+                placeIds.add(Integer.parseInt(((org.json.simple.JSONObject) object).get("placeId").toString()));
+            }
+        }
+        catch (Exception e) {
+            throw new ResourceNotFoundException(e + "AI 서버에서 답변을 불러오는데 실패했습니다.");
+        }
+
+        //PlaceId를 바탕으로 Tour API로 정보 불러오기
+        List<GetMainPlaceDTO> placeDTOS = new LinkedList<>();
+        for(int i : placeIds) {
+            //공통정보
+            String XML_STRING = PlaceRepository.getPlaceDetail(i);
+            JSONObject jsonObject = XML.toJSONObject(XML_STRING);
+            JSONObject responseJson = (JSONObject) jsonObject.get("response");
+            JSONObject body = (JSONObject) responseJson.get("body");
+            JSONObject items = (JSONObject) body.get("items");
+            JSONObject item = (JSONObject) items.get("item");
+
+            //태그 불러오기
+            ArrayList<String> tags = new ArrayList<>();
+            List<Todo> t = todoRepo.getTodosForPlaceId(i, null, TodoSortKey.LIKE_DESC, 0, 2);
+            String firstTag = "";
+
+            for (int j=0; j<t.size(); j++) {
+                if (j == 0) {
+                    firstTag = t.get(j).getTag();
+                    tags.add(firstTag);
+                }
+                else if (!t.get(j).getTag().equals(firstTag)) {
+                    tags.add(t.get(j).getTag());
+                }
+            }
+
+            GetMainPlaceDTO placeDTO = GetMainPlaceDTO.builder()
+                    .placeId(i)
+                    .placeName(item.get("title").toString())
+                    .placeImage(item.get("firstimage").toString())
+                    .tags(tags)
+                    .build();
+            placeDTOS.add(placeDTO);
         }
 
         BasicResponse<List<GetMainPlaceDTO>> response = BasicResponse.<List<GetMainPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTOS).build();

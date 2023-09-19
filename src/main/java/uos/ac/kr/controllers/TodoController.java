@@ -237,7 +237,7 @@ public class TodoController {
 
     @GetMapping("/tag")
     @ResponseStatus(value = HttpStatus.OK)
-    @ApiOperation(value = "TODO 상세 정보 조회", protocols = "http")
+    @ApiOperation(value = "태그 얻기", protocols = "http")
     public ResponseEntity<BasicResponse<Integer>> getTag(@RequestBody @Valid GetTagDTO tagDTO) {
 
         //HTTP Header

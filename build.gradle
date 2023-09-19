@@ -88,6 +88,12 @@ dependencies {
 	//JSON simple (String to JSON)
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
+	//WebClient
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	//Spring Cloud Gateway
+	implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
+
 }
 
 tasks.named('test') {
