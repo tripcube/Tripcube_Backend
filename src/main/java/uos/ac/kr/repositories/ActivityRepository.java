@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import uos.ac.kr.domains.Activity;
 
 @Repository
-public interface ActivityRepository extends JpaRepository<Activity, Integer> {
+public interface ActivityRepository extends JpaRepository<Activity, Integer>, ActivityRepositoryCustom {
 }

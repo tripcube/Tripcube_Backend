@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.XML;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.*;
@@ -23,6 +24,7 @@ import uos.ac.kr.repositories.*;
 import uos.ac.kr.responses.BasicResponse;
 import uos.ac.kr.utils.JsonUtil;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.Null;
 import java.text.SimpleDateFormat;
@@ -38,10 +40,12 @@ public class TodoController {
     private final TodoRepository todoRepo;
     private final LikeTodoRepository likeTodoRepo;
     private final UserRepository userRepo;
+    private final ActivityRepository activityRepo;
 
     @PostMapping()
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "Todo 등록", protocols = "http")
+    @Transactional
     public ResponseEntity<BasicResponse<Null>> insert(@RequestBody @Valid NewTodoDTO newTodoDTO) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -54,12 +58,34 @@ public class TodoController {
         newTodo.setCreatedAt(new Date());
         newTodo.setUser(user);
         newTodo.setLikes(0);
-        newTodo.setPlaceName(PlaceRepository.getPlaceName(newTodo.getPlaceId()));
 
+        // 관광지 이름, 지역 코드 Todo에 저장
+        String XML_STRING = PlaceRepository.getPlaceDetail(newTodo.getPlaceId());
+        JSONObject jsonObject = XML.toJSONObject(XML_STRING);
+        JSONObject responseJson = (JSONObject) jsonObject.get("response");
+        JSONObject body = (JSONObject) responseJson.get("body");
+        JSONObject items = (JSONObject) body.get("items");
+        JSONObject item = (JSONObject) items.get("item");
+
+        newTodo.setPlaceName(item.get("title").toString());
+        newTodo.setAreaCode1((int) item.get("areacode"));
+        newTodo.setAreaCode2((int) item.get("sigungucode"));
         todoRepo.save(newTodo);
 
-        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+        // 활동기록 등록
+        Activity activity = Activity.builder()
+                .placeId((int) item.get("contentid"))
+                .placeName(item.get("title").toString())
+                .placeImage(item.get("firstimage").toString())
+                .areaCode1((int) item.get("areacode"))
+                .areaCode2((int) item.get("sigungucode"))
+                .type("TODO")
+                .user(user)
+                .createdAt(new Date())
+                .build();
+        activityRepo.save(activity);
 
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -100,7 +126,7 @@ public class TodoController {
         int MyuserId = customUserDetails.getUserId();
 
         TodoSortKey todoSortKey = TodoSortKey.valueOf(sortkey);
-        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, todoSortKey, pages, limit);
+        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, null, todoSortKey, pages, limit);
         List<GetTodoDTO> getTodoDTOs = todos.stream().map(TodoMapper.INSTANCE::toDTO).collect(Collectors.toList());
 
         for(GetTodoDTO dto : getTodoDTOs) {

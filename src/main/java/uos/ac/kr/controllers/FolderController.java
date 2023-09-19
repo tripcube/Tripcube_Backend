@@ -230,7 +230,7 @@ public class FolderController {
         for(int i=0; i<scrapPlaces.size(); i++) {
             //태그 불러오기
             ArrayList<String> tags = new ArrayList<>();
-            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), TodoSortKey.LIKE_DESC, 0, 2);
+            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), null, TodoSortKey.LIKE_DESC, 0, 2);
             String firstTag = "";
 
             for (int j=0; j<todos.size(); j++) {

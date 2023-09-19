@@ -1,6 +1,8 @@
 package uos.ac.kr.controllers;
 
+import com.querydsl.core.Tuple;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import uos.ac.kr.domains.*;
 import uos.ac.kr.dtos.GetLocationPlaceDTO;
+import uos.ac.kr.dtos.GetMainPlaceDTO;
 import uos.ac.kr.dtos.GetPlaceDTO;
 import uos.ac.kr.dtos.GetScrapPlaceDTO;
 import uos.ac.kr.enums.TodoSortKey;
@@ -22,12 +25,10 @@ import uos.ac.kr.repositories.ScrapPlaceRepository;
 import uos.ac.kr.repositories.TodoRepository;
 import uos.ac.kr.responses.BasicResponse;
 import uos.ac.kr.utils.JsonUtil;
+import static uos.ac.kr.domains.QTodo.todo;
 
 import javax.validation.constraints.Null;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -274,7 +275,7 @@ public class PlaceController {
 
         //태그 불러오기
         ArrayList<String> tags = new ArrayList<>();
-        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, TodoSortKey.LIKE_DESC, 0, 2);
+        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, null, TodoSortKey.LIKE_DESC, 0, 2);
         String firstTag = "";
 
         for (int i=0; i<todos.size(); i++) {
@@ -323,7 +324,7 @@ public class PlaceController {
         for(int i=0; i<placeDTOS.size(); i++) {
             //태그 불러오기
             ArrayList<String> tags = new ArrayList<>();
-            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), TodoSortKey.LIKE_DESC, 0, 2);
+            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), null, TodoSortKey.LIKE_DESC, 0, 2);
             String firstTag = "";
 
             for (int j=0; j<todos.size(); j++) {
@@ -348,10 +349,59 @@ public class PlaceController {
     @GetMapping("/recommend/hot-place")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "24시간 인기 장소", protocols = "http")
-    public ResponseEntity<BasicResponse<List<GetScrapPlaceDTO>>> getHotPlaces() {
+    public ResponseEntity<BasicResponse<List<GetMainPlaceDTO>>> getHotPlaces(@RequestParam("areaCode1") int areaCode1, @RequestParam("areaCode2") int areaCode2, @RequestParam("page") int page) {
 
+        List<Integer> placeIds = activityRepo.getHotActivity(areaCode1, areaCode2, page);
+        List<GetMainPlaceDTO> placeDTOS = new LinkedList<>();
+        for (int i : placeIds) {
+            //태그 불러오기
+            ArrayList<String> tags = new ArrayList<>();
+            List<Todo> todos = todoRepo.getTodosForPlaceId(i, null, TodoSortKey.LIKE_DESC, 0, 2);
+            String firstTag = "";
 
-        BasicResponse<List<GetScrapPlaceDTO>> response = BasicResponse.<List<GetScrapPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(null).build();
+            for (int j=0; j<todos.size(); j++) {
+                if (j == 0) {
+                    firstTag = todos.get(j).getTag();
+                    tags.add(firstTag);
+                }
+                else if (!todos.get(j).getTag().equals(firstTag)) {
+                    tags.add(todos.get(j).getTag());
+                }
+            }
+            Activity activity = activityRepo.getOneActivity(i);
+            GetMainPlaceDTO dto = GetMainPlaceDTO.builder()
+                    .placeId(i)
+                    .placeName(activity.getPlaceName())
+                    .placeImage(activity.getPlaceImage())
+                    .tags(tags)
+                    .build();
+            placeDTOS.add(dto);
+        }
+
+        BasicResponse<List<GetMainPlaceDTO>> response = BasicResponse.<List<GetMainPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTOS).build();
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/recommend/todo-place")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "OO하기 좋은 장소", protocols = "http")
+    public ResponseEntity<BasicResponse<List<GetMainPlaceDTO>>> getTodoPlaces(@RequestParam("areaCode1") int areaCode1, @RequestParam("areaCode2") int areaCode2, @RequestParam("page") int page, @RequestParam("tag") String tag) {
+
+        List<Integer> placeIds = todoRepo.getPlaceIdFromAreaCode(areaCode1, areaCode2, page, tag);
+        List<GetMainPlaceDTO> placeDTOS = new LinkedList<>();
+        for (int i : placeIds) {
+            Activity activity = activityRepo.getOneActivity(i);
+            List<Todo> todo = todoRepo.getTodosForPlaceId(i, tag, TodoSortKey.LIKE_DESC, 0, 1);
+            GetMainPlaceDTO dto = GetMainPlaceDTO.builder()
+                    .placeId(i)
+                    .placeName(activity.getPlaceName())
+                    .placeImage(activity.getPlaceImage())
+                    .content(todo.get(0).getContent())
+                    .build();
+            placeDTOS.add(dto);
+        }
+
+        BasicResponse<List<GetMainPlaceDTO>> response = BasicResponse.<List<GetMainPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTOS).build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }

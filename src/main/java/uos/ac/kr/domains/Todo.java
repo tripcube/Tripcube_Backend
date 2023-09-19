@@ -39,6 +39,12 @@ public class Todo implements Serializable {
     @Column(nullable = true)
     private int likes;
 
+    @Column(nullable = false)
+    private int areaCode1;
+
+    @Column(nullable = false)
+    private int areaCode2;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="createdAt", nullable = false)
     private Date createdAt;

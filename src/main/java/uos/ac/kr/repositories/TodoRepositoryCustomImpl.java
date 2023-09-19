@@ -1,6 +1,7 @@
 package uos.ac.kr.repositories;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -53,9 +54,12 @@ public class TodoRepositoryCustomImpl implements TodoRepositoryCustom{
     }
 
     @Override
-    public List<Todo> getTodosForPlaceId(int placeId, TodoSortKey sortKey, int pages, int limit) {
+    public List<Todo> getTodosForPlaceId(int placeId, String tag, TodoSortKey sortKey, int pages, int limit) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(todo.placeId.eq(placeId));
+        if (tag != null) {
+            builder.and(todo.tag.eq(tag));
+        }
 
         OrderSpecifier<?>[] sortOrder = new OrderSpecifier[] {};
 
@@ -85,6 +89,19 @@ public class TodoRepositoryCustomImpl implements TodoRepositoryCustom{
         }
 
         return queryFactory.selectFrom(todo).where(builder).offset(limit * pages).orderBy(sortOrder).limit(limit).fetch();
+    }
 
+    @Override
+    public List<Integer> getPlaceIdFromAreaCode(int areaCode1, int areaCode2, int page, String tag) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if (areaCode1 != 0) {
+            builder.and(todo.areaCode1.eq(areaCode1));
+        }
+        if (areaCode2 != 0) {
+            builder.and(todo.areaCode2.eq(areaCode2));
+        }
+        builder.and(todo.tag.eq(tag));
+
+        return queryFactory.select(todo.placeId).from(todo).groupBy(todo.placeId).where(builder).orderBy(todo.likes.sum().desc()).offset((page-1)*5).limit(5).fetch();
     }
 }
