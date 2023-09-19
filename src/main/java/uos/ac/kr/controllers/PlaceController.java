@@ -9,16 +9,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import uos.ac.kr.domains.CustomUserDetails;
-import uos.ac.kr.domains.Scrap_Place;
-import uos.ac.kr.domains.Todo;
-import uos.ac.kr.domains.User;
+import uos.ac.kr.domains.*;
 import uos.ac.kr.dtos.GetLocationPlaceDTO;
 import uos.ac.kr.dtos.GetPlaceDTO;
 import uos.ac.kr.dtos.GetScrapPlaceDTO;
 import uos.ac.kr.enums.TodoSortKey;
 import uos.ac.kr.exceptions.AccessDeniedException;
 import uos.ac.kr.mappers.ScrapPlaceMapper;
+import uos.ac.kr.repositories.ActivityRepository;
 import uos.ac.kr.repositories.PlaceRepository;
 import uos.ac.kr.repositories.ScrapPlaceRepository;
 import uos.ac.kr.repositories.TodoRepository;
@@ -40,6 +38,7 @@ public class PlaceController {
 
     private final TodoRepository todoRepo;
     private final ScrapPlaceRepository scrapPlaceRepo;
+    private final ActivityRepository activityRepo;
 
     @GetMapping("/location")
     @ResponseStatus(value = HttpStatus.OK)
@@ -238,6 +237,8 @@ public class PlaceController {
         placeDTO.setTel(item.get("tel").toString());
         placeDTO.setWebsite(item.get("homepage").toString());
 
+        JSONObject detailItem = item;
+
         //소개정보
         XML_STRING = PlaceRepository.getPlaceDetail2(placeId, placeDTO.getContenttype());
 
@@ -252,7 +253,6 @@ public class PlaceController {
 
         //사진정보
         XML_STRING = PlaceRepository.getPlaceImages(placeId);
-        System.out.println(XML_STRING);
 
         jsonObject = XML.toJSONObject(XML_STRING);
         responseJson = (JSONObject) jsonObject.get("response");
@@ -287,6 +287,22 @@ public class PlaceController {
             }
         }
         placeDTO.setTags(tags);
+
+        // 활동기록 등록
+        User user = new User();
+        user.setUserId(MyuserId);
+        Activity activity = Activity.builder()
+                .placeId((int) detailItem.get("contentid"))
+                .placeName(detailItem.get("title").toString())
+                .placeImage(detailItem.get("firstimage").toString())
+                .areaCode1((int) detailItem.get("areacode"))
+                .areaCode2((int) detailItem.get("sigungucode"))
+                .type("SER")
+                .user(user)
+                .createdAt(new Date())
+                .build();
+
+        activityRepo.save(activity);
 
         BasicResponse<GetPlaceDTO> response = BasicResponse.<GetPlaceDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTO).build();
 
@@ -325,6 +341,17 @@ public class PlaceController {
 
         BasicResponse<List<GetScrapPlaceDTO>> response = BasicResponse.<List<GetScrapPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(placeDTOS).build();
 
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
+    @GetMapping("/recommend/hot-place")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "24시간 인기 장소", protocols = "http")
+    public ResponseEntity<BasicResponse<List<GetScrapPlaceDTO>>> getHotPlaces() {
+
+
+        BasicResponse<List<GetScrapPlaceDTO>> response = BasicResponse.<List<GetScrapPlaceDTO>>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(null).build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }

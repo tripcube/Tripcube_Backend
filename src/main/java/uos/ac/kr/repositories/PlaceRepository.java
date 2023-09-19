@@ -110,7 +110,7 @@ public class PlaceRepository {
     //공통정보
     static public String getPlaceDetail(int placeId) {
         String value = "";
-        String uri = "http://apis.data.go.kr/B551011/KorService1/detailCommon1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&MobileOS=ETC&MobileApp=AppTest&defaultYN=Y&firstImageYN=Y&addrinfoYN=Y&mapinfoYN=Y";
+        String uri = "http://apis.data.go.kr/B551011/KorService1/detailCommon1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&MobileOS=ETC&MobileApp=AppTest&defaultYN=Y&firstImageYN=Y&addrinfoYN=Y&mapinfoYN=Y&areacodeYN=Y";
         uri = uri + "&contentId=" + placeId;
 
         try {
