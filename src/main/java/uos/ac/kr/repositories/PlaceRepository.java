@@ -4,6 +4,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import reactor.core.publisher.Mono;
 import uos.ac.kr.dtos.GetPlaceDTO;
 import uos.ac.kr.exceptions.AccessDeniedException;
 import uos.ac.kr.exceptions.ResourceNotFoundException;
@@ -60,7 +61,7 @@ public class PlaceRepository {
 
 
    static public String getLocationPlace(double mapX, double mapY, int page) {
-        String value = "";
+        String value ="";
         String uri = "http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&numOfRows=10&MobileOS=ETC&MobileApp=AppTest&_type=Json&radius=1000";
         uri = uri + "&mapX=" + mapX + "&mapY=" + mapY + "&pageNo=" + page;
 
@@ -133,7 +134,7 @@ public class PlaceRepository {
     }
 
     //소개정보
-    static public String getPlaceDetail2(int placeId, int contentType) {
+    static public Mono<String> getPlaceDetail2(int placeId, int contentType) {
         String value = "";
         String uri = "http://apis.data.go.kr/B551011/KorService1/detailIntro1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&MobileOS=ETC&MobileApp=AppTest";
         uri = uri + "&contentId=" + placeId + "&contentTypeId=" + contentType;
@@ -154,10 +155,11 @@ public class PlaceRepository {
             throw new AccessDeniedException(e.getMessage());
         }
 
-        return value;
+        Mono<String> data = Mono.just(value);
+        return data;
     }
 
-    static public String getPlaceImages(int placeId) {
+    static public Mono<String> getPlaceImages(int placeId) {
         String value = "";
         String uri = "http://apis.data.go.kr/B551011/KorService1/detailImage1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&MobileOS=ETC&MobileApp=AppTest&numOfRows=10&imageYN=Y&subImageYN=Y";
         uri = uri + "&contentId=" + placeId;
@@ -178,7 +180,8 @@ public class PlaceRepository {
             throw new AccessDeniedException(e.getMessage());
         }
 
-        return value;
+        Mono<String> data = Mono.just(value);
+        return data;
     }
 
 }

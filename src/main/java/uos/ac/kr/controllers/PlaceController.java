@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 import uos.ac.kr.domains.*;
 import uos.ac.kr.dtos.GetLocationPlaceDTO;
 import uos.ac.kr.dtos.GetMainPlaceDTO;
@@ -33,6 +35,7 @@ import uos.ac.kr.utils.JsonUtil;
 import javax.validation.constraints.Null;
 import java.util.*;
 import java.util.stream.Collectors;
+import reactor.core.scheduler.Schedulers;
 
 @RequiredArgsConstructor
 @RestController()
@@ -244,9 +247,11 @@ public class PlaceController {
         JSONObject detailItem = item;
 
         //소개정보
-        XML_STRING = PlaceRepository.getPlaceDetail2(placeId, placeDTO.getContenttype());
+        Mono<String> XML_STRING2 = PlaceRepository.getPlaceDetail2(placeId, placeDTO.getContenttype()).subscribeOn(Schedulers.boundedElastic());
+        Mono<String> XML_STRING3 = PlaceRepository.getPlaceImages(placeId).subscribeOn(Schedulers.boundedElastic());
+        Tuple2<String, String> XML_DATA = Mono.zip(XML_STRING2, XML_STRING3).block();
 
-        jsonObject = XML.toJSONObject(XML_STRING);
+        jsonObject = XML.toJSONObject(XML_DATA.getT1());
         responseJson = (JSONObject) jsonObject.get("response");
         body = (JSONObject) responseJson.get("body");
         items = (JSONObject) body.get("items");
@@ -256,9 +261,7 @@ public class PlaceController {
         placeDTO.setParking(item.get("parking").toString());
 
         //사진정보
-        XML_STRING = PlaceRepository.getPlaceImages(placeId);
-
-        jsonObject = XML.toJSONObject(XML_STRING);
+        jsonObject = XML.toJSONObject(XML_DATA.getT2());
         responseJson = (JSONObject) jsonObject.get("response");
         body = (JSONObject) responseJson.get("body");
         items = (JSONObject) body.get("items");

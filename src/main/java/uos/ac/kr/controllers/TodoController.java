@@ -238,10 +238,13 @@ public class TodoController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/tag")
+    @PostMapping("/tag")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "태그 얻기", protocols = "http")
-    public ResponseEntity<BasicResponse<Integer>> getTag(@RequestBody @Valid GetTagDTO tagDTO) {
+    public ResponseEntity<BasicResponse<String>> getTag(@RequestBody @Valid GetTagDTO tagDTO) {
+
+        //분류기준
+        String[] category = {"사진", "체험", "산책", "운동", "관람", "음식", "힐링", "지식", "쇼핑"};
 
         //HTTP Header
         HttpHeaders headers = new HttpHeaders();
@@ -275,7 +278,7 @@ public class TodoController {
         );
 
         // ChatGPT API Response에서 답변 추출
-        int value;
+        String value;
         try {
             JSONParser parser = new JSONParser();
             Object o = parser.parse(response2.getBody());
@@ -285,13 +288,13 @@ public class TodoController {
 
             String[] strs;
             strs = ((String) message.get("content")).split(" ");
-            value = Integer.parseInt(strs[1]);
+            value = category[Integer.parseInt(strs[1]) - 1];
         }
         catch (Exception e) {
             throw new ResourceNotFoundException("ChatGPT 답변을 불러오는데 실패했습니다.");
         }
 
-        BasicResponse<Integer> response = BasicResponse.<Integer>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(value).build();
+        BasicResponse<String> response = BasicResponse.<String>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(value).build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
