@@ -141,11 +141,10 @@ public class AuthController {
     }
 
 
-    @PostMapping("/renew")
+    @GetMapping("/renew")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "토큰 재발급", protocols = "http")
-    public ResponseEntity<AuthResponse> renewAccessToken(@RequestBody RenewDTO renewDTO) {
-        String refreshToken = renewDTO.getRefreshToken();
+    public ResponseEntity<AuthResponse> renewAccessToken(@RequestHeader("Authorization") String refreshToken) {
 
         try {
             jwtTokenProvider.validateToken(refreshToken);
@@ -153,7 +152,8 @@ public class AuthController {
             throw new AccessDeniedException("Wrong refresh token.");
         }
 
-        Integer userId = renewDTO.getUserId();
+
+        Integer userId = refreshTokenRepository.findByRefreshToken(refreshToken).get().getUser().getUserId();
 
         RefreshToken latestRefreshToken = refreshTokenRepository.getLatestOne(userId).orElseThrow(() -> new AccessDeniedException("Empty refresh token."));
 

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController()
-@RequestMapping("/todos")
+@RequestMapping(value = "/todos")
 @CrossOrigin(origins = "*")
 
 public class TodoController {
@@ -61,6 +61,7 @@ public class TodoController {
 
         // 관광지 이름, 지역 코드 Todo에 저장
         String XML_STRING = PlaceRepository.getPlaceDetail(newTodo.getPlaceId());
+        System.out.println(XML_STRING);
         JSONObject jsonObject = XML.toJSONObject(XML_STRING);
         JSONObject responseJson = (JSONObject) jsonObject.get("response");
         JSONObject body = (JSONObject) responseJson.get("body");
@@ -70,6 +71,8 @@ public class TodoController {
         newTodo.setPlaceName(item.get("title").toString());
         newTodo.setAreaCode1((int) item.get("areacode"));
         newTodo.setAreaCode2((int) item.get("sigungucode"));
+        System.out.println(newTodo.getPlaceName());
+        System.out.println(newTodoDTO.getContent());
         todoRepo.save(newTodo);
 
         // 활동기록 등록

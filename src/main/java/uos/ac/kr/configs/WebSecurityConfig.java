@@ -28,7 +28,7 @@ public class WebSecurityConfig {
             "/swagger-resources/**",
             "/swagger-ui.html",
             "/v2/api-docs",
-            "/webjars/**"
+            "/webjars/**",
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

@@ -6,11 +6,13 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
+import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+import java.util.List;
 
 @Configuration
 @EnableWebMvc
@@ -18,6 +20,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerConfig {
     // http://localhost:8080/swagger-ui/index.html
 
+    private static final String REFERENCE = "Authorization 헤더 값";
     @Bean
     public Docket swagger() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -27,7 +30,9 @@ public class SwaggerConfig {
                 .paths(PathSelectors.ant("/**"))
                 .build()
                 .apiInfo(apiInfo())
-                .enable(true);
+                .enable(true)
+                .securityContexts(List.of(securityContext()))
+                .securitySchemes(List.of(securityScheme()));
     }
 
     private ApiInfo apiInfo() {
@@ -38,4 +43,26 @@ public class SwaggerConfig {
                 .version("1.0")
                 .build();
     }
+
+    private SecurityContext securityContext() {
+        return springfox.documentation
+                .spi.service.contexts
+                .SecurityContext
+                .builder()
+                .securityReferences(defaultAuth())
+                .operationSelector(operationContext -> true)
+                .build();
+    }
+
+    private List<SecurityReference> defaultAuth() {
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+        authorizationScopes[0] = new AuthorizationScope("global", "accessEverything");
+        return List.of(new SecurityReference(REFERENCE, authorizationScopes));
+    }
+
+    private ApiKey securityScheme() {
+        String targetHeader = "Authorization";
+        return new ApiKey(REFERENCE, targetHeader, "header");
+    }
+
 }

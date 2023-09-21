@@ -10,7 +10,4 @@ import lombok.*;
 public class RenewDTO {
 
     private String refreshToken;
-
-    private Integer userId;
-
 }
