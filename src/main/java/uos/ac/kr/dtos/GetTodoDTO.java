@@ -22,7 +22,7 @@ public class GetTodoDTO {
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private String date;
 
-    private String tag;
+    private int tag;
     private boolean isLike;
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)

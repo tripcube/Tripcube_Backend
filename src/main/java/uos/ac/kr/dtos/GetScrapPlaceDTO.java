@@ -16,5 +16,5 @@ public class GetScrapPlaceDTO {
     private String placeAddress;
     private String placeName;
     private String placeImage;
-    private List<String> tags;
+    private List<Integer> tags;
 }

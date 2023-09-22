@@ -14,7 +14,7 @@ public class GetMainPlaceDTO {
     private int placeId;
     private String placeName;
     private String placeImage;
-    private List<String> tags;
+    private List<Integer> tags;
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private String content;

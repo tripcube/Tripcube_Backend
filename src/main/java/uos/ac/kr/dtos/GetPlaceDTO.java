@@ -29,7 +29,7 @@ public class GetPlaceDTO {
     private int contenttype;
     private boolean scrap;
 
-    private ArrayList<String> tags;
+    private ArrayList<Integer> tags;
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private String tel;

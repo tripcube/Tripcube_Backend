@@ -54,10 +54,10 @@ public class TodoRepositoryCustomImpl implements TodoRepositoryCustom{
     }
 
     @Override
-    public List<Todo> getTodosForPlaceId(int placeId, String tag, TodoSortKey sortKey, int pages, int limit) {
+    public List<Todo> getTodosForPlaceId(int placeId, int tag, TodoSortKey sortKey, int pages, int limit) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(todo.placeId.eq(placeId));
-        if (tag != null) {
+        if (tag != 0) {
             builder.and(todo.tag.eq(tag));
         }
 
@@ -92,7 +92,7 @@ public class TodoRepositoryCustomImpl implements TodoRepositoryCustom{
     }
 
     @Override
-    public List<Integer> getPlaceIdFromAreaCode(int areaCode1, int areaCode2, int page, String tag) {
+    public List<Integer> getPlaceIdFromAreaCode(int areaCode1, int areaCode2, int page, int tag) {
         BooleanBuilder builder = new BooleanBuilder();
         if (areaCode1 != 0) {
             builder.and(todo.areaCode1.eq(areaCode1));

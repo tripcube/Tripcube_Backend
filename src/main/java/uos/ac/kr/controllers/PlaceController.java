@@ -280,16 +280,16 @@ public class PlaceController {
         }
 
         //태그 불러오기
-        ArrayList<String> tags = new ArrayList<>();
-        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, null, TodoSortKey.LIKE_DESC, 0, 2);
-        String firstTag = "";
+        ArrayList<Integer> tags = new ArrayList<>();
+        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, 0, TodoSortKey.LIKE_DESC, 0, 2);
+        int firstTag = 0;
 
         for (int i=0; i<todos.size(); i++) {
             if (i == 0) {
                 firstTag = todos.get(i).getTag();
                 tags.add(firstTag);
             }
-            else if (!todos.get(i).getTag().equals(firstTag)) {
+            else if (todos.get(i).getTag() != firstTag) {
                 tags.add(todos.get(i).getTag());
             }
         }
@@ -329,16 +329,16 @@ public class PlaceController {
 
         for(int i=0; i<placeDTOS.size(); i++) {
             //태그 불러오기
-            ArrayList<String> tags = new ArrayList<>();
-            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), null, TodoSortKey.LIKE_DESC, 0, 2);
-            String firstTag = "";
+            ArrayList<Integer> tags = new ArrayList<>();
+            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), 0, TodoSortKey.LIKE_DESC, 0, 2);
+            int firstTag = 0;
 
             for (int j=0; j<todos.size(); j++) {
                 if (j == 0) {
                     firstTag = todos.get(j).getTag();
                     tags.add(firstTag);
                 }
-                else if (!todos.get(j).getTag().equals(firstTag)) {
+                else if (todos.get(j).getTag() != firstTag) {
                     tags.add(todos.get(j).getTag());
                 }
             }
@@ -361,16 +361,16 @@ public class PlaceController {
         List<GetMainPlaceDTO> placeDTOS = new LinkedList<>();
         for (int i : placeIds) {
             //태그 불러오기
-            ArrayList<String> tags = new ArrayList<>();
-            List<Todo> todos = todoRepo.getTodosForPlaceId(i, null, TodoSortKey.LIKE_DESC, 0, 2);
-            String firstTag = "";
+            ArrayList<Integer> tags = new ArrayList<>();
+            List<Todo> todos = todoRepo.getTodosForPlaceId(i, 0, TodoSortKey.LIKE_DESC, 0, 2);
+            int firstTag = 0;
 
             for (int j=0; j<todos.size(); j++) {
                 if (j == 0) {
                     firstTag = todos.get(j).getTag();
                     tags.add(firstTag);
                 }
-                else if (!todos.get(j).getTag().equals(firstTag)) {
+                else if (todos.get(j).getTag() != firstTag) {
                     tags.add(todos.get(j).getTag());
                 }
             }
@@ -391,7 +391,7 @@ public class PlaceController {
     @GetMapping("/recommend/todo-place")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "OO하기 좋은 장소", protocols = "http")
-    public ResponseEntity<BasicResponse<List<GetMainPlaceDTO>>> getTodoPlaces(@RequestParam("areaCode1") int areaCode1, @RequestParam("areaCode2") int areaCode2, @RequestParam("page") int page, @RequestParam("tag") String tag) {
+    public ResponseEntity<BasicResponse<List<GetMainPlaceDTO>>> getTodoPlaces(@RequestParam("areaCode1") int areaCode1, @RequestParam("areaCode2") int areaCode2, @RequestParam("page") int page, @RequestParam("tag") int tag) {
 
         List<Integer> placeIds = todoRepo.getPlaceIdFromAreaCode(areaCode1, areaCode2, page, tag);
         List<GetMainPlaceDTO> placeDTOS = new LinkedList<>();
@@ -475,16 +475,16 @@ public class PlaceController {
             JSONObject item = (JSONObject) items.get("item");
 
             //태그 불러오기
-            ArrayList<String> tags = new ArrayList<>();
-            List<Todo> t = todoRepo.getTodosForPlaceId(i, null, TodoSortKey.LIKE_DESC, 0, 2);
-            String firstTag = "";
+            ArrayList<Integer> tags = new ArrayList<>();
+            List<Todo> t = todoRepo.getTodosForPlaceId(i, 0, TodoSortKey.LIKE_DESC, 0, 2);
+            int firstTag = 0;
 
             for (int j=0; j<t.size(); j++) {
                 if (j == 0) {
                     firstTag = t.get(j).getTag();
                     tags.add(firstTag);
                 }
-                else if (!t.get(j).getTag().equals(firstTag)) {
+                else if (t.get(j).getTag() != firstTag) {
                     tags.add(t.get(j).getTag());
                 }
             }

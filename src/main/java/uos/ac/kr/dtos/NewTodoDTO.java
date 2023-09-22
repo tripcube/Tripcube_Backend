@@ -10,6 +10,6 @@ import lombok.*;
 public class NewTodoDTO {
     private int placeId;
     private String content;
-    private String tag;
+    private int tag;
 
 }

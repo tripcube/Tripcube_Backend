@@ -33,8 +33,8 @@ public class Todo implements Serializable {
     @Column(nullable = false, length = 1000)
     private String content;
 
-    @Column(nullable = false, length = 30)
-    private String tag;
+    @Column(nullable = false)
+    private int tag;
 
     @Column(nullable = true)
     private int likes;

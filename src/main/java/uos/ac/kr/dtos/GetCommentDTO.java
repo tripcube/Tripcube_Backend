@@ -28,7 +28,7 @@ public class GetCommentDTO {
     private int placeId;
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    private String tag;
+    private int tag;
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private int todo_likes;

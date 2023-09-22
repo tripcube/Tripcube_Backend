@@ -10,7 +10,7 @@ import java.util.List;
 public interface TodoRepositoryCustom {
     List<Todo> getTodosForUserId(int userId, TodoSortKey sortKey, int pages, int limit);
 
-    List<Todo> getTodosForPlaceId(int placeId, String tag, TodoSortKey sortKey, int pages, int limit);
+    List<Todo> getTodosForPlaceId(int placeId, int tag, TodoSortKey sortKey, int pages, int limit);
 
-    List<Integer> getPlaceIdFromAreaCode(int areaCode1, int areaCode2, int page, String tag);
+    List<Integer> getPlaceIdFromAreaCode(int areaCode1, int areaCode2, int page, int tag);
 }

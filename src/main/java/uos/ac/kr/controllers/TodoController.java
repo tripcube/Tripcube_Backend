@@ -71,8 +71,6 @@ public class TodoController {
         newTodo.setPlaceName(item.get("title").toString());
         newTodo.setAreaCode1((int) item.get("areacode"));
         newTodo.setAreaCode2((int) item.get("sigungucode"));
-        System.out.println(newTodo.getPlaceName());
-        System.out.println(newTodoDTO.getContent());
         todoRepo.save(newTodo);
 
         // 활동기록 등록
@@ -129,7 +127,7 @@ public class TodoController {
         int MyuserId = customUserDetails.getUserId();
 
         TodoSortKey todoSortKey = TodoSortKey.valueOf(sortkey);
-        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, null, todoSortKey, pages, limit);
+        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, 0, todoSortKey, pages, limit);
         List<GetTodoDTO> getTodoDTOs = todos.stream().map(TodoMapper.INSTANCE::toDTO).collect(Collectors.toList());
 
         for(GetTodoDTO dto : getTodoDTOs) {
@@ -241,10 +239,7 @@ public class TodoController {
     @PostMapping("/tag")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "태그 얻기", protocols = "http")
-    public ResponseEntity<BasicResponse<String>> getTag(@RequestBody @Valid GetTagDTO tagDTO) {
-
-        //분류기준
-        String[] category = {"사진", "체험", "산책", "운동", "관람", "음식", "힐링", "지식", "쇼핑"};
+    public ResponseEntity<BasicResponse<Integer>> getTag(@RequestBody @Valid GetTagDTO tagDTO) {
 
         //HTTP Header
         HttpHeaders headers = new HttpHeaders();
@@ -278,7 +273,7 @@ public class TodoController {
         );
 
         // ChatGPT API Response에서 답변 추출
-        String value;
+        int value;
         try {
             JSONParser parser = new JSONParser();
             Object o = parser.parse(response2.getBody());
@@ -288,13 +283,13 @@ public class TodoController {
 
             String[] strs;
             strs = ((String) message.get("content")).split(" ");
-            value = category[Integer.parseInt(strs[1]) - 1];
+            value = Integer.parseInt(strs[1]);
         }
         catch (Exception e) {
             throw new ResourceNotFoundException("ChatGPT 답변을 불러오는데 실패했습니다.");
         }
 
-        BasicResponse<String> response = BasicResponse.<String>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(value).build();
+        BasicResponse<Integer> response = BasicResponse.<Integer>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(value).build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
