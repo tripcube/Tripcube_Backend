@@ -48,7 +48,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
                 break;
         }
 
-        return queryFactory.selectFrom(comment).join(comment.todo, todo).where(builder).offset(10L *pages).limit(10).orderBy(sortOrder).fetch();
+        return queryFactory.selectFrom(comment).join(comment.todo, todo).where(builder).offset(10L * (pages-1)).limit(10).orderBy(sortOrder).fetch();
 
     }
 
@@ -84,7 +84,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
                 break;
         }
 
-        return queryFactory.selectFrom(comment).join(comment.todo, todo).where(builder).offset(10L *pages).limit(10).orderBy(sortOrder).fetch();
+        return queryFactory.selectFrom(comment).join(comment.todo, todo).where(builder).offset(10L * (pages-1)).limit(10).orderBy(sortOrder).fetch();
 
     }
 }

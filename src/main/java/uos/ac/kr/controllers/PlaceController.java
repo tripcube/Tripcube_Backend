@@ -281,7 +281,7 @@ public class PlaceController {
 
         //태그 불러오기
         ArrayList<Integer> tags = new ArrayList<>();
-        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, 0, TodoSortKey.LIKE_DESC, 0, 2);
+        List<Todo> todos = todoRepo.getTodosForPlaceId(placeId, 0, TodoSortKey.LIKE_DESC, 1, 2);
         int firstTag = 0;
 
         for (int i=0; i<todos.size(); i++) {
@@ -330,7 +330,7 @@ public class PlaceController {
         for(int i=0; i<placeDTOS.size(); i++) {
             //태그 불러오기
             ArrayList<Integer> tags = new ArrayList<>();
-            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), 0, TodoSortKey.LIKE_DESC, 0, 2);
+            List<Todo> todos = todoRepo.getTodosForPlaceId(scrapPlaces.get(i).getPlaceId(), 0, TodoSortKey.LIKE_DESC, 1, 2);
             int firstTag = 0;
 
             for (int j=0; j<todos.size(); j++) {
@@ -362,7 +362,7 @@ public class PlaceController {
         for (int i : placeIds) {
             //태그 불러오기
             ArrayList<Integer> tags = new ArrayList<>();
-            List<Todo> todos = todoRepo.getTodosForPlaceId(i, 0, TodoSortKey.LIKE_DESC, 0, 2);
+            List<Todo> todos = todoRepo.getTodosForPlaceId(i, 0, TodoSortKey.LIKE_DESC, 1, 2);
             int firstTag = 0;
 
             for (int j=0; j<todos.size(); j++) {
@@ -397,7 +397,7 @@ public class PlaceController {
         List<GetMainPlaceDTO> placeDTOS = new LinkedList<>();
         for (int i : placeIds) {
             Activity activity = activityRepo.getOneActivity(i);
-            List<Todo> todo = todoRepo.getTodosForPlaceId(i, tag, TodoSortKey.LIKE_DESC, 0, 1);
+            List<Todo> todo = todoRepo.getTodosForPlaceId(i, tag, TodoSortKey.LIKE_DESC, 1, 1);
             GetMainPlaceDTO dto = GetMainPlaceDTO.builder()
                     .placeId(i)
                     .placeName(activity.getPlaceName())
@@ -419,7 +419,7 @@ public class PlaceController {
         int MyUserId = customUserDetails.getUserId();
 
         //사용자가 작성한 TODO로 Text 작성
-        List<Todo> todos = todoRepo.getTodosForUserId(MyUserId, TodoSortKey.LIKE_DESC, 0, 10);
+        List<Todo> todos = todoRepo.getTodosForUserId(MyUserId, TodoSortKey.LIKE_DESC, 1, 10);
         String text = "";
         for(Todo t : todos) {
             text += t.getContent();
@@ -476,7 +476,7 @@ public class PlaceController {
 
             //태그 불러오기
             ArrayList<Integer> tags = new ArrayList<>();
-            List<Todo> t = todoRepo.getTodosForPlaceId(i, 0, TodoSortKey.LIKE_DESC, 0, 2);
+            List<Todo> t = todoRepo.getTodosForPlaceId(i, 0, TodoSortKey.LIKE_DESC, 1, 2);
             int firstTag = 0;
 
             for (int j=0; j<t.size(); j++) {

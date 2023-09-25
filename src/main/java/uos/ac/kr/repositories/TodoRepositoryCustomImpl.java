@@ -49,7 +49,7 @@ public class TodoRepositoryCustomImpl implements TodoRepositoryCustom{
                 break;
         }
 
-        return queryFactory.selectFrom(todo).join(todo.user, user).where(builder).offset(10L *pages).limit(limit).orderBy(sortOrder).fetch();
+        return queryFactory.selectFrom(todo).join(todo.user, user).where(builder).offset(10L * (pages-1)).limit(limit).orderBy(sortOrder).fetch();
 
     }
 
@@ -88,7 +88,7 @@ public class TodoRepositoryCustomImpl implements TodoRepositoryCustom{
                 break;
         }
 
-        return queryFactory.selectFrom(todo).where(builder).offset(limit * pages).orderBy(sortOrder).limit(limit).fetch();
+        return queryFactory.selectFrom(todo).where(builder).offset(limit * (pages-1)).orderBy(sortOrder).limit(limit).fetch();
     }
 
     @Override

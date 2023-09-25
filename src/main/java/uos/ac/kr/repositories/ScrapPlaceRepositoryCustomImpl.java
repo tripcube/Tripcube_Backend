@@ -29,6 +29,6 @@ public class ScrapPlaceRepositoryCustomImpl implements ScrapPlaceRepositoryCusto
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(scrap_Place.user.userId.eq(userId));
 
-        return queryFactory.selectFrom(scrap_Place).where(builder).orderBy(scrap_Place.createdAt.desc()).offset(10L * pages).limit(10).fetch();
+        return queryFactory.selectFrom(scrap_Place).where(builder).orderBy(scrap_Place.createdAt.desc()).offset(10L * (pages-1)).limit(10).fetch();
     }
 }
