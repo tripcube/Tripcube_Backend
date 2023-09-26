@@ -9,16 +9,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import uos.ac.kr.domains.CustomUserDetails;
 import uos.ac.kr.domains.User;
-import uos.ac.kr.dtos.GetTodoDTO;
-import uos.ac.kr.dtos.GetUserDTO;
-import uos.ac.kr.dtos.SelectUserDTO;
-import uos.ac.kr.dtos.UpdateUserDTO;
+import uos.ac.kr.dtos.*;
 import uos.ac.kr.exceptions.AccessDeniedException;
 import uos.ac.kr.exceptions.ResourceNotFoundException;
 import uos.ac.kr.mappers.UserMapper;
 import uos.ac.kr.repositories.UserRepository;
 import uos.ac.kr.responses.BasicResponse;
 
+import javax.swing.plaf.PanelUI;
 import javax.validation.constraints.Null;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +71,26 @@ public class UserController {
 
         BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
 
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/fcmToken")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "FCM 토큰 등록", protocols = "http")
+    public ResponseEntity<BasicResponse<Null>> insertFCMToken(@RequestBody InsertFCMTokenDTO fcmTokenDTO) {
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyuserId = customUserDetails.getUserId();
+
+        Optional<User> op = userRepo.findById(MyuserId);
+        if (op.isEmpty()) {
+            throw new ResourceNotFoundException("유저를 찾을 수 없습니다.");
+        }
+
+        User user = op.get();
+        user.setFcmToken(fcmTokenDTO.getFcmToken());
+        userRepo.save(user);
+
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

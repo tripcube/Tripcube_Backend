@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 src/main/java/uos/ac/kr/key/
 /src/main/resources/application.properties
+/src/main/java/uos/ac/kr/utils/firebase/tripcube-1fb82-firebase-adminsdk-9il8e-b98cd9356e.json
 
 ### STS ###
 .apt_generated

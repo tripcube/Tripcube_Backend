@@ -257,8 +257,16 @@ public class PlaceController {
         items = (JSONObject) body.get("items");
         item = (JSONObject) items.get("item");
 
-        placeDTO.setUseTime(item.get("usetime").toString());
-        placeDTO.setParking(item.get("parking").toString());
+        try {
+            placeDTO.setUseTime(item.get("usetime").toString());
+        } catch (Exception e) {
+            placeDTO.setUseTime("null");
+        }
+        try {
+            placeDTO.setParking(item.get("parking").toString());
+        } catch (Exception e) {
+            placeDTO.setParking("null");
+        }
 
         //사진정보
         jsonObject = XML.toJSONObject(XML_DATA.getT2());

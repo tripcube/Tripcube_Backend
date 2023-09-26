@@ -22,6 +22,7 @@ import uos.ac.kr.key.ChatGPT;
 import uos.ac.kr.mappers.TodoMapper;
 import uos.ac.kr.repositories.*;
 import uos.ac.kr.responses.BasicResponse;
+import uos.ac.kr.utils.FcmUtil;
 import uos.ac.kr.utils.JsonUtil;
 
 import javax.transaction.Transactional;
@@ -41,6 +42,7 @@ public class TodoController {
     private final LikeTodoRepository likeTodoRepo;
     private final UserRepository userRepo;
     private final ActivityRepository activityRepo;
+    private final FcmUtil fcmUtil;
 
     @PostMapping()
     @ResponseStatus(value = HttpStatus.OK)
@@ -175,6 +177,11 @@ public class TodoController {
 
         todo.setLikes(todo.getLikes() + 1);
         todoRepo.save(todo);
+
+        //FCM 메시지 전송
+        String FCMToken = todo.getUser().getFcmToken();
+        fcmUtil.sendFCM(FCMToken, user.getName(), "나의 TODO에 좋아요를 눌렀습니다.");
+
 
         BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
 

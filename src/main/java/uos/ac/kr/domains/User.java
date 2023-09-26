@@ -37,6 +37,8 @@ public class User implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="createdAt", nullable = false)
     private Date createdAt;
+    @Column(nullable = true, length = 200)
+    private String fcmToken;
 
     // 연관관계
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
