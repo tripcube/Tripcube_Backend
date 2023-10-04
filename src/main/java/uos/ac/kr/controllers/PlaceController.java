@@ -365,6 +365,7 @@ public class PlaceController {
     @ApiOperation(value = "24시간 인기 장소", protocols = "http")
     public ResponseEntity<BasicResponse<List<GetMainPlaceDTO>>> getHotPlaces(@RequestParam("areaCode1") int areaCode1, @RequestParam("areaCode2") int areaCode2, @RequestParam("page") int page) {
 
+        System.out.println("areaCode1 : "+areaCode1 + "areaCode2 : " + areaCode2 + "page : " + page);
         List<Integer> placeIds = activityRepo.getHotActivity(areaCode1, areaCode2, page);
         List<GetMainPlaceDTO> placeDTOS = new LinkedList<>();
         for (int i : placeIds) {
@@ -401,6 +402,7 @@ public class PlaceController {
     @ApiOperation(value = "OO하기 좋은 장소", protocols = "http")
     public ResponseEntity<BasicResponse<List<GetMainPlaceDTO>>> getTodoPlaces(@RequestParam("areaCode1") int areaCode1, @RequestParam("areaCode2") int areaCode2, @RequestParam("page") int page, @RequestParam("tag") int tag) {
 
+        System.out.println("areaCode1 : "+areaCode1 + "areaCode2 : " + areaCode2 + "page : " + page + "tag : " + tag);
         List<Integer> placeIds = todoRepo.getPlaceIdFromAreaCode(areaCode1, areaCode2, page, tag);
         List<GetMainPlaceDTO> placeDTOS = new LinkedList<>();
         for (int i : placeIds) {

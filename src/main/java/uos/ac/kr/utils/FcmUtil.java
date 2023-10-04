@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class FcmUtil {
     private final FirebaseMessaging firebaseMessaging;
     public void sendFCM(String FCMToken, String title, String body) {
+        System.out.println("FCM SENDING ... \n" + "FCMToken : " + FCMToken + " title : " + title + " body " +body);
         Notification notification = Notification.builder()
                 .setTitle(title)
                 .setBody(body)
