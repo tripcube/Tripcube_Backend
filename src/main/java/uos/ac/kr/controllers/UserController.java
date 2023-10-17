@@ -59,27 +59,23 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{userId}/profile")
+    @PutMapping("/profile")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "프로필 수정", protocols = "http")
-    public ResponseEntity<BasicResponse<Null>> updateProfile(@RequestBody HashMap<String, String> map, @PathVariable("userId") int userId) {
+    public ResponseEntity<BasicResponse<Null>> updateProfile(@RequestBody UpdateUserProfileDTO userProfileDTO) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int MyuserId = customUserDetails.getUserId();
 
-        if (MyuserId != userId) {
-            throw new AccessDeniedException("다른 유저의 정보를 변경할 수 없습니다.");
-        }
-
         User user = userRepo.findById(MyuserId).get();
 
-        Optional<User> userTmp = userRepo.getUserByName(map.get("name"));
+        Optional<User> userTmp = userRepo.getUserByName(userProfileDTO.getName());
         if (!userTmp.isEmpty() && userTmp.get().getName() != user.getName()) {
             throw new AccessDeniedException("이미 존재하는 닉네임입니다.");
         }
 
-        user.setName(map.get("name"));
-        user.setOneliner(map.get("oneliner"));
+        user.setName(userProfileDTO.getName());
+        user.setOneliner(userProfileDTO.getOneliner());
 
         userRepo.save(user);
 
@@ -87,6 +83,87 @@ public class UserController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    @PostMapping("/password")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "비밀번호 확인", protocols = "http")
+    public ResponseEntity<BasicResponse<Boolean>> checkPassword(@RequestBody GetPasswordDTO passwordDTO) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyuserId = customUserDetails.getUserId();
+
+        User user = userRepo.findById(MyuserId).get();
+
+        Boolean value = false;
+
+        if (user.getPassword().equals(passwordDTO.getPassword())) {
+            value = true;
+        }
+
+        BasicResponse<Boolean> response = BasicResponse.<Boolean>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(value).build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/password")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "비밀번호 수정", protocols = "http")
+    public ResponseEntity<BasicResponse<Null>> updatePassword(@RequestBody GetPasswordDTO passwordDTO) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyuserId = customUserDetails.getUserId();
+
+        User user = userRepo.findById(MyuserId).get();
+
+        if (user.getPassword().equals(passwordDTO.getPassword())) {
+            throw new AccessDeniedException("기존의 비밀번호와 동일합니다.");
+        }
+
+        user.setPassword(passwordDTO.getPassword());
+        userRepo.save(user);
+
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/profileImage")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "프로필 이미지 수정", protocols = "http")
+    public ResponseEntity<BasicResponse<Null>> updateProfileImage(@RequestBody GetUserImageDTO userImageDTO) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyuserId = customUserDetails.getUserId();
+
+        User user = userRepo.findById(MyuserId).get();
+        user.setProfileImage(userImageDTO.getImageURL());
+
+        userRepo.save(user);
+
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/backgroundImage")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiOperation(value = "배경 이미지 수정", protocols = "http")
+    public ResponseEntity<BasicResponse<Null>> updateBackgroundImage(@RequestBody GetUserImageDTO userImageDTO) {
+
+        CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int MyuserId = customUserDetails.getUserId();
+
+        User user = userRepo.findById(MyuserId).get();
+        user.setBackgroundImage(userImageDTO.getImageURL());
+
+        userRepo.save(user);
+
+        BasicResponse<Null> response = BasicResponse.<Null>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+
 
     @PostMapping("/fcmToken")
     @ResponseStatus(value = HttpStatus.OK)
