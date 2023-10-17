@@ -62,7 +62,7 @@ public class PlaceRepository {
 
    static public String getLocationPlace(double mapX, double mapY, int page) {
         String value ="";
-        String uri = "http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&numOfRows=10&MobileOS=ETC&MobileApp=AppTest&_type=Json&radius=1000";
+        String uri = "http://apis.data.go.kr/B551011/KorService1/locationBasedList1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&numOfRows=30&MobileOS=ETC&MobileApp=AppTest&_type=Json&radius=1000";
         uri = uri + "&mapX=" + mapX + "&mapY=" + mapY + "&pageNo=" + page;
 
         try {
@@ -86,7 +86,7 @@ public class PlaceRepository {
 
     static public String getKeywordPlace(String keyword, int page) {
         String value = "";
-        String uri = "http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&numOfRows=10&MobileOS=ETC&MobileApp=AppTest&listYN=Y";
+        String uri = "http://apis.data.go.kr/B551011/KorService1/searchKeyword1?serviceKey=QLp3nZEg9kI557QS69hIyn6tbE5Stw%2BfSjkIX8RxQPoix2Unp3ZtIkVmVZsre5BqTaLEVBH4X9oK4Lcp7VMjuQ%3D%3D&numOfRows=30&MobileOS=ETC&MobileApp=AppTest&listYN=Y";
         uri = uri + "&keyword=" + URLEncoder.encode(keyword) + "&pageNo=" + page;
 
         try {

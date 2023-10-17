@@ -100,6 +100,11 @@ public class TodoController {
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int MyuserId = customUserDetails.getUserId();
 
+        // 마이페이지 조회
+        if (userId == 0) {
+            userId = MyuserId;
+        }
+
         TodoSortKey todoSortKey = TodoSortKey.valueOf(sortkey);
         List<Todo> todos = todoRepo.getTodosForUserId(userId, todoSortKey, pages, 10);
         List<GetTodoDTO> getTodoDTOs = todos.stream().map(TodoMapper.INSTANCE::toDTO).collect(Collectors.toList());

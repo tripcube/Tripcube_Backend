@@ -71,6 +71,11 @@ public class CommentController {
         CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int MyuserId = customUserDetails.getUserId();
 
+        // 마이페이지 조회
+        if (userId == 0) {
+            userId = MyuserId;
+        }
+
         CommentSortKey commentSortKey = CommentSortKey.valueOf(sortkey);
         List<Comment> comments = commentRepo.getCommentsFromUserId(userId, commentSortKey, pages);
         List<GetCommentDTO> getCommentDTOs = comments.stream().map(CommentMapper.INSTANCE::toDTO).collect(Collectors.toList());

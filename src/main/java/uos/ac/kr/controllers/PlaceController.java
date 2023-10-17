@@ -57,17 +57,15 @@ public class PlaceController {
 
         // 총 장소의 개수가 10개가 될 때까지 Tour API 호출 (숙박, 식당, 카페, 쇼핑은 제외)
         GetLocationPlaceDTO locationPlaceDTO = new GetLocationPlaceDTO(page, new ArrayList<>());
-        int totalCount = 0;
-        do {
             // Tour API 호출 후 XML 데이터 JOSN으로 변환
             String XML_STRING = PlaceRepository.getLocationPlace(mapX, mapY, page);
             JSONObject jsonObject = XML.toJSONObject(XML_STRING);
             JSONObject responseJson = (JSONObject) jsonObject.get("response");
             JSONObject body = (JSONObject) responseJson.get("body");
-            totalCount += (int) body.get("numOfRows");
             // 더 이상 불러올 데이터가 없다면 break
             if (((int) body.get("numOfRows")) == 0) {
-                break;
+                BasicResponse<GetLocationPlaceDTO> response = BasicResponse.<GetLocationPlaceDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(locationPlaceDTO).count(0).build();
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
 
             JSONObject items = (JSONObject) body.get("items");
@@ -77,7 +75,6 @@ public class PlaceController {
             for(int i=0; i<itemArray.length(); i++) {
                 JSONObject item = (JSONObject) itemArray.get(i);
                 if ((int) item.get("contenttypeid") == 38 || (int) item.get("contenttypeid") == 39 || (int) item.get("contenttypeid") == 32) {
-                    totalCount -= 1;
                     continue;
                 }
                 GetPlaceDTO placeDTO = new GetPlaceDTO();
@@ -96,11 +93,10 @@ public class PlaceController {
                 locationPlaceDTO.setPlaces(preList);
             }
             page += 1;
-        } while (totalCount < 10);
 
         locationPlaceDTO.setPage(page);
 
-        BasicResponse<GetLocationPlaceDTO> response = BasicResponse.<GetLocationPlaceDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(locationPlaceDTO).count(totalCount).build();
+        BasicResponse<GetLocationPlaceDTO> response = BasicResponse.<GetLocationPlaceDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(locationPlaceDTO).count(0).build();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -114,15 +110,13 @@ public class PlaceController {
         int userId = customUserDetails.getUserId();
 
         GetLocationPlaceDTO locationPlaceDTO = new GetLocationPlaceDTO(page, new ArrayList<>());
-        int totalCount = 0;
-        do {
             String XML_STRING = PlaceRepository.getKeywordPlace(keyword, page);
             JSONObject jsonObject = XML.toJSONObject(XML_STRING);
             JSONObject responseJson = (JSONObject) jsonObject.get("response");
             JSONObject body = (JSONObject) responseJson.get("body");
-            totalCount += (int) body.get("numOfRows");
             if (((int) body.get("numOfRows")) == 0) {
-                break;
+                BasicResponse<GetLocationPlaceDTO> response = BasicResponse.<GetLocationPlaceDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(locationPlaceDTO).count(0).build();
+                return new ResponseEntity<>(response, HttpStatus.CREATED);
             }
 
             JSONObject items = (JSONObject) body.get("items");
@@ -132,7 +126,6 @@ public class PlaceController {
             for(int i=0; i<itemArray.length(); i++) {
                 JSONObject item = (JSONObject) itemArray.get(i);
                 if ((int) item.get("contenttypeid") == 38 || (int) item.get("contenttypeid") == 39 || (int) item.get("contenttypeid") == 32) {
-                    totalCount -= 1;
                     continue;
                 }
                 GetPlaceDTO placeDTO = new GetPlaceDTO();
@@ -151,11 +144,10 @@ public class PlaceController {
                 locationPlaceDTO.setPlaces(preList);
             }
             page += 1;
-        } while (totalCount < 10);
 
         locationPlaceDTO.setPage(page);
 
-        BasicResponse<GetLocationPlaceDTO> response = BasicResponse.<GetLocationPlaceDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(locationPlaceDTO).count(totalCount).build();
+        BasicResponse<GetLocationPlaceDTO> response = BasicResponse.<GetLocationPlaceDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(locationPlaceDTO).count(page).build();
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

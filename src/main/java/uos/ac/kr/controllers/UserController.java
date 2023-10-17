@@ -35,10 +35,24 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     @ApiOperation(value = "마이페이지 유저 프로필 얻기", protocols = "http")
     public ResponseEntity<BasicResponse<GetUserDTO>> getUser(@PathVariable("userId") int userId) throws Exception {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new Exception("Not found Member with UserId = " + userId));
 
-        GetUserDTO userDTO = UserMapper.INSTANCE.toGetDTO(user);
+        User user;
+        GetUserDTO userDTO;
+
+        if (userId == 0) {
+            CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            int MyuserId = customUserDetails.getUserId();
+            user = userRepo.findById(MyuserId)
+                    .orElseThrow(() -> new Exception("Not found Member with UserId = " + MyuserId));
+            userDTO = UserMapper.INSTANCE.toGetDTO(user);
+
+        }
+        else {
+            user = userRepo.findById(userId)
+                    .orElseThrow(() -> new Exception("Not found Member with UserId = " + userId));
+            userDTO = UserMapper.INSTANCE.toGetDTO(user);
+            userDTO.setLoginId(null);
+        }
 
         BasicResponse<GetUserDTO> response = BasicResponse.<GetUserDTO>builder().code(HttpStatus.CREATED.value()).httpStatus(HttpStatus.CREATED).message("SUCCESS").data(userDTO).build();
 

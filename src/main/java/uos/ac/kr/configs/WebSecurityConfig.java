@@ -35,7 +35,7 @@ public class WebSecurityConfig {
         http.httpBasic().disable() // rest api 만을 고려하여 기본 설정은 해제하겠습니다.
                 .cors().configurationSource(request -> {
                     var cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(List.of("http://localhost:3001", "http://sw.uos.ac.kr"));
+                    cors.setAllowedOrigins(List.of("http://localhost:3001", "http://sw.uos.ac.kr", "http://10.0.2.2:3001"));
                     cors.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS"));
                     cors.setAllowedHeaders(List.of("*"));
                     return cors;
